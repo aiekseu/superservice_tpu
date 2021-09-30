@@ -10,8 +10,6 @@ class SchedulePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    final today = watch(currentDateProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Расписание гр. ${watch(userGroupProvider)}'),
