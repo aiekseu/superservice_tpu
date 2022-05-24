@@ -24,11 +24,24 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_riverpod:
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  # State management
+  flutter_riverpod: ^1.0.3
+  # Icons for iOS
   cupertino_icons: ^1.0.2
+  # Localization for dates
+  intl: ^0.17.0
+  # Google bottom bar
+  salomon_bottom_bar: ^3.3.0
+  # Native customizable dialogs
+  ndialog: ^4.1.1
+  # Autocompletes
+  flutter_typeahead: ^4.0.0
+  # Vector images
+  flutter_svg:
+  # ID generator
+  xid: ^1.0.7
+  # Local storage
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +62,9 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/
+    - assets/services/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
