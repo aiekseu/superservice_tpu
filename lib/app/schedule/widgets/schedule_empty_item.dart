@@ -43,7 +43,7 @@ class ScheduleEmptyItem extends StatelessWidget {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 230, 230, 230),
+                  color:  Color.fromRGBO(245, 245, 245, 1),
                   borderRadius: BorderRadius.circular(6.0),
                   boxShadow: [
                     BoxShadow(

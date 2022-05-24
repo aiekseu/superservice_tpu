@@ -26,8 +26,8 @@ class MyApp extends ConsumerWidget {
             final _pickedDate = ref.watch(pickedDateProvider.state);
             return CalendarAppBar(
               onDateChanged: (value) => _pickedDate.state = value,
-              firstDate: DateTime.now().subtract(Duration(days: 140)),
-              lastDate: DateTime.now().add(Duration(days: 140)),
+              firstDate: DateTime.now().subtract(Duration(days: 14)),
+              lastDate: DateTime.now().add(Duration(days: 30)),
               selectedDate: DateTime.now(),
               fullCalendar: false,
               white: Colors.white,

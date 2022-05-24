@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ndialog/ndialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:superservice_tpu/app/schedule/data/schedule_providers.dart';
 import 'package:superservice_tpu/entities/schedule/ScheduleItem.dart';
 import 'package:superservice_tpu/services/floorplans.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -22,8 +23,9 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
   void initState() {
     super.initState();
     // this.svg = '';
-    this.svg = new FloorPlans()
-        .getClassLocationSvgBy2Params(widget.scheduleItem.location.building, widget.scheduleItem.location.audience);
+    this.svg = new FloorPlans().getClassLocationSvgBy2Params(
+        widget.scheduleItem.location.building,
+        widget.scheduleItem.location.audience);
   }
 
   String svg = '';
@@ -35,8 +37,8 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
     });
   }
 
-  _handleLongPress() async {
-    var result = await NAlertDialog(
+  void _handleLongPress() async {
+    await NAlertDialog(
       dialogStyle: DialogStyle(
         titleDivider: true,
         borderRadius: BorderRadius.circular(6.0),
@@ -48,10 +50,10 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
       transitionType: DialogTransitionType.Shrink,
       transitionDuration: Duration(milliseconds: 150),
     );
-    print(result);
   }
 
   /// Диалог при долгом клике
+  //<editor-fold desc="Dialog content">
   Widget _dialogContent() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -59,7 +61,9 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
         Padding(
           padding: const EdgeInsets.only(top: 12.0),
           child: Text(
-            'Вы собираетесь скрыть',
+            widget.scheduleItem.isHidden
+                ? 'Вы собираетесь вернуть'
+                : 'Вы собираетесь скрыть',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
@@ -136,38 +140,37 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
           height: 12.0,
         ),
 
-        /// Опции
         ListButton(
           text: 'Только эту пару',
           onTap: () async {
-            final prefs = await SharedPreferences.getInstance();
-
-            var hashes = prefs.getStringList('bannedHashes') ?? <String>[''];
-            hashes.add(widget.scheduleItem.hashCode.toString());
-            await prefs.setStringList('bannedHashes', hashes);
-
-            Navigator.pop(context, 0);
-          },
-        ),
-        Divider(height: 1),
-        ListButton(
-          text: 'Эту пару на каждой неделе',
-          onTap: () {
-            Navigator.pop(context, 1);
-          },
-        ),
-        Divider(height: 1),
-        ListButton(
-          text: 'Только лекции',
-          onTap: () {
-            Navigator.pop(context, 2);
+            ref
+                .read(BannedScheduleItemsIds.provider.notifier)
+                .toggle(widget.scheduleItem.id);
+            Navigator.pop(context);
           },
         ),
         Divider(height: 1),
         ListButton(
           text: 'Всю дисциплину',
           onTap: () {
-            Navigator.pop(context, 3);
+            ref
+                .read(BannedSubjectsIds.provider.notifier)
+                .toggle(widget.scheduleItem.subject.id);
+            Navigator.pop(context);
+          },
+        ),
+        Divider(height: 1),
+        ListButton(
+          text: 'Эту пару на каждой неделе',
+          onTap: () {
+            Navigator.pop(context);
+          },
+        ),
+        Divider(height: 1),
+        ListButton(
+          text: 'Только лекции',
+          onTap: () {
+            Navigator.pop(context);
           },
         ),
         Divider(height: 1),
@@ -175,7 +178,10 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
     );
   }
 
+//</editor-fold>
+
   /// Доп. инфармация при разворачивании карточки пары
+  //<editor-fold desc="Additional info">
   Widget _additionalInfo() {
     return Padding(
       padding: EdgeInsets.only(top: 8.0),
@@ -186,14 +192,31 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               /// Тип дисциплины (основвная, электив)
-              Text(widget.scheduleItem.subject.type.type),
+              Text(
+                widget.scheduleItem.subject.type.type,
+                style: TextStyle(
+                  fontSize: widget.scheduleItem.isHidden ? 12 : 14,
+                ),
+              ),
+
               /// Почта лектора
-              Text(widget.scheduleItem.lecturer.email),
+              Text(
+                widget.scheduleItem.lecturer.email,
+                style: TextStyle(
+                  fontSize: widget.scheduleItem.isHidden ? 12 : 14,
+                ),
+              ),
             ],
           ),
           SizedBox(height: 4.0),
+
           /// Тип аттестации на дисциплине
-          Text(widget.scheduleItem.subject.attestation.name),
+          Text(
+            widget.scheduleItem.subject.attestation.name,
+            style: TextStyle(
+              fontSize: widget.scheduleItem.isHidden ? 12 : 14,
+            ),
+          ),
           SizedBox(height: 8.0),
           Container(
             child: SvgPicture.string(svg),
@@ -219,6 +242,8 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
     );
   }
 
+  //</editor-fold>
+
   /// Карточка пары
   @override
   Widget build(BuildContext context) {
@@ -232,7 +257,12 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
               /// Полоска справа
               decoration: BoxDecoration(
                 border: Border(
-                  right: BorderSide(color: Colors.green, width: 2.5),
+                  right: BorderSide(
+                    color: widget.scheduleItem.isHidden
+                        ? Colors.black26
+                        : Colors.green,
+                    width: 2.5,
+                  ),
                 ),
               ),
               child: Padding(
@@ -259,7 +289,9 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
             Expanded(
               child: Ink(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: widget.scheduleItem.isHidden
+                      ? Color.fromRGBO(240, 240, 240, 1)
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(6.0),
                   boxShadow: [
                     BoxShadow(
@@ -292,17 +324,29 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             /// Номер пары и тип
-                            Text(widget.scheduleItem.position.position.toString() +
-                                '.  ' +
-                                widget.scheduleItem.type),
+                            Text(
+                              widget.scheduleItem.position.position.toString() +
+                                  '.  ' +
+                                  widget.scheduleItem.type,
+                              style: TextStyle(
+                                  fontSize:
+                                      widget.scheduleItem.isHidden ? 12 : 14),
+                            ),
 
                             /// Название пары
                             Text(
-                              widget.scheduleItem.subject.shortName,
+                              _expanded
+                                  ? widget.scheduleItem.subject.name
+                                  : widget.scheduleItem.subject.shortName,
                               style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                decoration: widget.scheduleItem.isHidden ? TextDecoration.lineThrough : TextDecoration.none,
+                                fontSize:
+                                    widget.scheduleItem.isHidden ? 15 : 18,
+                                fontWeight: widget.scheduleItem.isHidden
+                                    ? FontWeight.normal
+                                    : FontWeight.bold,
+                                decoration: widget.scheduleItem.isHidden
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
                               ),
                             ),
 
@@ -312,23 +356,34 @@ class ScheduleItemCardState extends ConsumerState<ScheduleItemCard> {
                                   ? widget.scheduleItem.lecturer.fullName()
                                   : widget.scheduleItem.lecturer.shortName(),
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize:
+                                    widget.scheduleItem.isHidden ? 12 : 14,
                               ),
                             ),
-                            SizedBox(height: 8.0),
+                            if (!widget.scheduleItem.isHidden || _expanded)
+                              SizedBox(height: 8.0),
 
                             /// Местоположение пары
-                            Text(widget.scheduleItem.location.toString()),
+                            if (!widget.scheduleItem.isHidden || _expanded)
+                              Text(
+                                widget.scheduleItem.location.toString(),
+                                style: TextStyle(
+                                  fontSize:
+                                      widget.scheduleItem.isHidden ? 12 : 14,
+                                ),
+                              ),
 
                             /// Дополнительная инф. при раскрытии
                             if (_expanded) _additionalInfo(),
                             Container(
                               width: double.infinity,
+                              height: 12,
                               child: Center(
                                 child: Icon(
                                   _expanded
                                       ? Icons.expand_less
                                       : Icons.expand_more,
+                                  size: 16,
                                 ),
                               ),
                             )

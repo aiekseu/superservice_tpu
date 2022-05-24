@@ -6,17 +6,19 @@ import 'package:xid/xid.dart';
 
 class ScheduleItem {
 
+  final String id;
+  bool isHidden = false;
   final Subject subject;
   final Audience location;
   final Lecturer lecturer;
   final SchedulePosition position;
-  bool isHidden = false;
   final String type;
   final DateTime date;
 
 //<editor-fold desc="Data Methods">
 
   ScheduleItem({
+    required this.id,
     required this.subject,
     required this.location,
     required this.lecturer,
@@ -52,6 +54,7 @@ class ScheduleItem {
   String toString() {
     return 'ScheduleItem{' +
         ' subject: $subject,' +
+        ' id: $id,' +
         ' location: $location,' +
         ' lecturer: $lecturer,' +
         ' position: $position,' +
@@ -62,6 +65,7 @@ class ScheduleItem {
   }
 
   ScheduleItem copyWith({
+    String? id,
     Subject? subject,
     Audience? location,
     Lecturer? lecturer,
@@ -71,6 +75,7 @@ class ScheduleItem {
     DateTime? date,
   }) {
     return ScheduleItem(
+      id: id ?? this.id,
       subject: subject ?? this.subject,
       location: location ?? this.location,
       lecturer: lecturer ?? this.lecturer,
@@ -82,6 +87,7 @@ class ScheduleItem {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': this.id,
       'subject': this.subject,
       'location': this.location,
       'lecturer': this.lecturer,
@@ -93,6 +99,7 @@ class ScheduleItem {
 
   factory ScheduleItem.fromMap(Map<String, dynamic> map) {
     return ScheduleItem(
+      id: map['id'] as String,
       subject: map['subject'] as Subject,
       location: map['location'] as Audience,
       lecturer: map['lecturer'] as Lecturer,
